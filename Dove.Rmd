@@ -1,0 +1,232 @@
+---
+title: "Vero's Data Analysis"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+Date: September 2021
+---
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+
+
+
+```{r}
+# Let's read in our data
+Big_Data <- read.csv("Vero.csv")
+
+real_data <- (Big_Data)
+as_tibble(real_data)
+```
+ 
+```{r}
+#Now let's redefine the columns
+file <- real_data %>%  rename(marriage_Experience = Based.on.your.experience..would.you.say.you.married.the.wrong.person., Dating =While.dating..did.you.have.the.intention.of.settling.with.your.divorced.partner..or.was.it.just.for.fun., Intention = If.you.didnâ..t.have.the.intention.of.settling.with.your.partner..why.did.you.marry.him.her.anyway., Notices = Those.things.that.transpired.in.your.marriage.that.led.to.the.divorce..did.you.notice.them.before.you.consent.to.the.marriage., love_scale = While.dating.and.married..would.you.say.your.love.was.greater.than.your.spouseâ..s., Divorce = Who.initiated.the.divorce..did.you., second_Chance =If.you.were.given.another.opportunity.to.set.things.right.and.make.your.marriage.work..would.you.gladly.agree.,Spouse_remarried = Is.your.spouse.remarried., Years_before_Divorce = How.many.years.was.the.marriage.before.the.divorce., Divorce_cause =  What.was.the.main.cause.of.divorce., Marriage_Failure = The.rate.at.which.marriages.are.failing..what.do.you.think.is.the.problem.,Motive =What.do.you.think.should.be.the.motive.behind.marriage, motive_1 = What.do.you.think.should.be.the.motive.behind.marriage.1, ncourtship_Opinion = Considering.the.marriage.in.the.holy.book..there.was.nothing.like.courting.dating.and.they.made.a.beautiful.marriage..Would.you.say.courtship.is.not.important., courtship_duration_suggestion = If.no..how.long.would.you.suggest.for.courtship, A_duration_suggestion = X6..If.yes..why.not., God_Plan =What.do.you.think.is.Godâ..s.purpose.for.marriage., worthy =  Which.of.the.following.is.more.worthy.of.consideration.before.embarking.on.the.journey.of.marriage., advice = What.advice.do.you.have.for.singles.and.intending.couples, motive_2 = What.do.you.think.should.be.the.motive.behind.marriage., steps = What.steps.should.be.taken.and.what.factors.should.be.considered.before.going.into.marriage., collapse_idea = What.advice.would.you.give.couples.whose.marriage.is.on.the.verge.of.collapsing., Thoughts = Do.you.think.marriage.is.important., courtship_duration = How.long.courtship.did.you.have.before.marriage., job_nature =Considering.the.nature.of.your.job..does.it.permit.you.to.spend.quality.time.with.your.family., Love_enough =  Is.love.enough.to.sustain.a.marriage., marriage_sustainance = Which.would.you.say.is.more.important.to.sustain.a.marriage., marriage_duration =How.long.have.you.been.married., dating_status = Are.you.dating., considerations = Before.considering.marriage..which.of.the.following.do.you.think.is.Worthy.of.consideration., features = What.do.you.look.out.for.in.your.future.partner..that.is.what.do.you.cherish.most.in.a.relationship., importance = what.do.you.think.is.important.to.sustain.a.marriage., consider_divorce= Would.you.consider.divorce..peradventure.things.don.t.go.the.way.you.plan., divorce_reason = What.would.you.say.is.the.reason.behind.divorce., marriage_motive = What.do.you.think.should.be.the.motive.behind.marriage..1, marriaage_purpose = What.do.you.think.is.the.purpose.of.marriage., settling_down =   Do.you.see.yourself.settling.down.with.who.you.are.dating.at.the.moment., why_not= if.no..why.dating.anyway., marriage_motive_2 = What.do.you.think.should.be.the.motive.behind.marriage..2)
+
+```
+ 
+ 
+```{r}
+# View our data
+View(file)
+```
+ 
+ 
+```{r}
+# Getting to know the data. 
+table(file$SEX, file$AGE)
+
+table(file$SEX, file$Religion)
+
+table(file$SEX, file$Marital.Status)
+
+```
+```{r}
+ms <- file %>%
+     group_by(Marital.Status) %>%
+     count()%>%
+     ungroup()%>%
+     mutate(perc = `n` / sum(`n`))%>%
+     arrange(perc)%>%
+     mutate(labels =scales::percent(perc))
+
+```
+
+```{r}
+# for the plots 
+
+ggplot(ms, aes(x = "", y = perc, fill = Marital.Status)) +
+  geom_col(color = "black") +
+  geom_label(aes(label = labels), color = c(1, "white", "white","Gold"),
+            position = position_stack(vjust = 0.5),
+            show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Marital.Status")) +
+  scale_fill_viridis_d() +
+  coord_polar(theta = "y") + 
+  theme_void()
+
+
+
+# ggplot(file, aes(x = "", y = SEX, fill = Marital.Status)) +
+#   geom_col(color = "black") +
+#   geom_label(aes(label = labels), color = c(1, "white", "white","Gold"),
+#             position = position_stack(vjust = 0.5),
+#             show.legend = FALSE) +
+#   guides(fill = guide_legend(title = "Marital.Status")) +
+#   scale_fill_viridis_d() +
+#   coord_polar(theta = "y") + 
+#   theme_void()
+```
+ 
+ 
+```{r}
+# The singles opinion
+# Data extraction for singles who are dating
+single_dating <- file %>% 
+                select(-Timestamp,-marriage_Experience,-Dating,-Intention,-Notices,    -love_scale,-divorce_reason,Divorce,Divorce_cause,-Did.you.feel.any.regret.in.your.heart.after.the.divorce.,-second_Chance,-Spouse_remarried,-Years_before_Divorce, -Marriage_Failure,-Motive, -motive_1,-courtship_Opinion, -courtship_duration_suggestion,-A_duration_suggestion, -God_Plan,-worthy,-advice,-X,-motive_2,-collapse_idea, -marriage_duration, -why_not,-marriage_motive_2, -X.1,-Sex, -Divorce, -Divorce_cause,-steps) %>%
+  
+                filter(Marital.Status == "Single" & 
+                                   dating_status == "Yes")
+# Data extraction for single who are not dating
+
+single_not_dating <- file %>% 
+  
+  select(-Timestamp,-marriage_Experience,-Dating,-Intention,-Notices,    -love_scale,-divorce_reason,Divorce,Divorce_cause,-Did.you.feel.any.regret.in.your.heart.after.the.divorce.,-second_Chance,-Spouse_remarried,-Years_before_Divorce, -Marriage_Failure,-Motive, -motive_1,-courtship_Opinion, -courtship_duration_suggestion,-A_duration_suggestion, -God_Plan,-worthy,-advice,-X,-motive_2,-collapse_idea, -marriage_duration, -why_not,-marriage_motive_2, -X.1,-Sex, -Divorce, -Divorce_cause,-steps) %>%
+  
+   filter (Marital.Status == "Single" & dating_status == "No")
+
+# Extract data for Married folks
+ Married_people <- file %>% 
+  select(-Timestamp, -marriage_Experience, -Dating, -Intention,-Notices,-love_scale,-Divorce,-Did.you.feel.any.regret.in.your.heart.after.the.divorce.,-second_Chance,Spouse_remarried,Years_before_Divorce, -Divorce_cause,-motive_1,-X, -dating_status,-considerations, -features, -importance,-divorce_reason,-Divorce_cause, -marriage_motive,-marriaage_purpose,-why_not,-settling_down,-marriage_motive_2, -X.1,-Sex,-Spouse_remarried,-Years_before_Divorce)  %>% 
+  filter(Marital.Status == "Married")
+ 
+ #extract widow data
+The_widow <- file %>%
+  select( c( 2:6,27:36))%>%
+  filter(Marital.Status == "Widowed")
+
+#extract data for divorced
+divorced <- file %>% 
+  select (c(2:17, 26, 28:36))%>% 
+  filter(Marital.Status == "Divorced")
+
+```
+
+
+```{r}
+# Text segmentation analysis
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(RColorBrewer)
+library(syuzhet)
+library(ggplot2)
+```
+
+```{r}
+# sentiment analysis
+corpus = Corpus(VectorSource(single_dating$marriage_motive))
+
+DTM <- TermDocumentMatrix(corpus)
+mat <- as.matrix(DTM)
+f <- sort(rowSums(mat),decreasing=TRUE)
+dat <- data.frame(word = names(f),freq=f)
+
+head(dat, 15)
+
+```
+ 
+```{r}
+set.seed(100)
+wordcloud(words = dat$word, freq = dat$freq, min.freq = 1, max.words=250, random.order=FALSE, rot.per=0.30, colors=brewer.pal(8, "Dark2"))
+```
+ 
+```{r}
+corpus_married = Corpus(VectorSource(Married_people$advice))
+
+DTM <- TermDocumentMatrix(corpus_married)
+mat <- as.matrix(DTM)
+f <- sort(rowSums(mat),decreasing=TRUE)
+dat <- data.frame(word = names(f),freq=f)
+
+head(dat, 15)
+
+
+
+set.seed(100)
+wordcloud(words = dat$word, freq = dat$freq, min.freq = 3, max.words=250, random.order=FALSE, rot.per=0.30, colors=brewer.pal(8, "Dark2"))
+
+
+```
+ 
+```{r}
+ms_s_d <- single_dating  %>%
+     group_by(consider_divorce) %>%
+     count()%>%
+     ungroup()%>%
+     mutate(perc = `n` / sum(`n`))%>%
+     arrange(perc)%>%
+     mutate(labels =scales::percent(perc))
+
+
+ggplot(ms_s_d, aes(x = "", y = perc, fill = consider_divorce)) +
+  geom_col(color = "grey") +
+  geom_label(aes(label = labels), color = c("red", "orange", "cyan"),
+            position = position_stack(vjust = 0.5),
+            show.legend = FALSE) +
+  guides(fill = guide_legend(title = "Consider Divorce")) +
+  scale_fill_viridis_d() +
+  coord_polar(theta = "y") + 
+  theme_void()
+
+```
+
+ 
+```{r}
+# barchat for non -dating
+
+
+barplot(table(divorced$courtship_duration),col = c("green1", "orange", "gold", "cyan"), title = "barplot of years spent", ylim = c(0,3.))
+```
+ 
+```{r}
+ggplot(s_n_d_filter, aes(x=courtship_duration, y= Profession)) + geom_bar(stat="identity")
+```
+ 
+ 
+
+ 
+ 
+```{r}
+single_dating %>%
+  group_by(marriage_motive) %>%
+  summarize(messages = n_distinct(SEX)) %>%
+  ggplot(aes(messages, marriage_motive)) +
+  geom_col() +
+  labs(y = NULL)
+```
+ 
+```{r}
+Married_people %>%
+  count(marriage_duration) %>%
+  mutate(perc = n/nrow(Married_people) * 100) -> exer
+
+
+
+ggplot(exer, aes(x = reorder(marriage_duration,-perc), y= perc, fill=marriage_duration)) + geom_bar(stat = "identity")
+
+```
+ 
+ 
+```{r}
+sus <- Married_people %>% 
+     group_by(marriage_sustainance)%>%
+     summarise(freq = n())
+
+ggplot(data = sus, aes(x= marriage_sustainance, y= freq, fill = marriage_sustainance))+ geom_bar(stat= "identity") + labs( x = "choices provided", y = "Frequency")
+```
+ 
+ 
