@@ -1,2 +1,2 @@
 # Word-Cloud
-Performing text analysis extracted from questionnaires 
+Performing sentiments analysis on data extracted from questionnaires 
